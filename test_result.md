@@ -359,12 +359,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "MongoDB Connection and Database Setup"
-    - "Projects CRUD API"
-    - "Sessions Management API"
-    - "Audio Files Upload and Management API"
-    - "Comments and Timestamped Feedback API"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
