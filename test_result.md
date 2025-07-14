@@ -197,15 +197,18 @@ backend:
 
   - task: "Billing and Invoices API"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/app/api/[[...path]]/route.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
         - agent: "main"
         - comment: "Implemented invoice management and billing system"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ TESTED: Billing and Invoices API working correctly. Invoice creation with detailed line items, listing, and status management all functional. Integration with payment systems working properly."
 
   - task: "Stripe Payment Integration"
     implemented: true
