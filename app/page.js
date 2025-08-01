@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { Calendar, Clock, Upload, Play, Pause, MessageSquare, FileAudio, DollarSign, Settings, Home, FolderOpen, Users, Bell, Plus, Send, Download, Share2, Volume2, MoreHorizontal } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar, Clock, Upload, Play, Pause, MessageSquare, FileAudio, DollarSign, Settings, Home, FolderOpen, Users, Bell, Plus, Send, Download, Share2, Volume2, MoreHorizontal, X } from 'lucide-react'
 
 export default function App() {
   const [currentView, setCurrentView] = useState('dashboard')
@@ -27,6 +29,14 @@ export default function App() {
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
   const [commentTime, setCommentTime] = useState(0)
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+  const [invoiceForm, setInvoiceForm] = useState({
+    clientName: '',
+    clientAddress: '',
+    clientVAT: '',
+    items: [{ description: '', quantity: '', unitPrice: '', vatRate: 20 }],
+    rib: ''
+  })
   const audioRef = useRef(null)
   const fileInputRef = useRef(null)
 
@@ -238,6 +248,121 @@ export default function App() {
       }
       setComments(prev => [...prev, comment].sort((a, b) => a.time - b.time))
       setNewComment('')
+    }
+  }
+
+  // Fonctions pour la gestion des factures
+  const addInvoiceItem = () => {
+    setInvoiceForm(prev => ({
+      ...prev,
+      items: [...prev.items, { description: '', quantity: '', unitPrice: '', vatRate: 20 }]
+    }))
+  }
+
+  const removeInvoiceItem = (index) => {
+    setInvoiceForm(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }))
+  }
+
+  const updateInvoiceItem = useCallback((index, field, value) => {
+    setInvoiceForm(prev => ({
+      ...prev,
+      items: prev.items.map((item, i) => 
+        i === index ? { ...item, [field]: value } : item
+      )
+    }))
+  }, [])
+
+  const handleNumberInput = useCallback((index, field, value) => {
+    // Pour les champs numériques, on garde la valeur comme string si elle est vide
+    // et on ne convertit en nombre que si c'est valide
+    const numValue = value === '' ? '' : parseFloat(value)
+    if (value === '' || !isNaN(numValue)) {
+      updateInvoiceItem(index, field, value === '' ? '' : numValue)
+    }
+  }, [updateInvoiceItem])
+
+  const handleInputChange = useCallback((field, value) => {
+    setInvoiceForm(prev => ({ ...prev, [field]: value }))
+  }, [])
+
+  const calculateItemTotal = (item) => {
+    const quantity = item.quantity || 0
+    const unitPrice = item.unitPrice || 0
+    const vatRate = item.vatRate || 0
+    
+    const subtotal = quantity * unitPrice
+    const vatAmount = subtotal * (vatRate / 100)
+    return {
+      subtotal,
+      vatAmount,
+      total: subtotal + vatAmount
+    }
+  }
+
+  const calculateInvoiceTotals = useMemo(() => {
+    return invoiceForm.items.reduce((totals, item) => {
+      const itemTotals = calculateItemTotal(item)
+      return {
+        subtotal: totals.subtotal + itemTotals.subtotal,
+        vatAmount: totals.vatAmount + itemTotals.vatAmount,
+        total: totals.total + itemTotals.total
+      }
+    }, { subtotal: 0, vatAmount: 0, total: 0 })
+  }, [invoiceForm.items])
+
+  const generateInvoiceNumber = () => {
+    const date = new Date()
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+    return `FACT-${year}${month}${day}-${random}`
+  }
+
+  const handleCreateInvoice = async () => {
+    const invoiceData = {
+      invoiceNumber: generateInvoiceNumber(),
+      clientName: invoiceForm.clientName,
+      clientAddress: invoiceForm.clientAddress,
+      clientVAT: invoiceForm.clientVAT,
+      items: invoiceForm.items.map(item => ({
+        ...item,
+        ...calculateItemTotal(item)
+      })),
+      totals: calculateInvoiceTotals,
+      rib: invoiceForm.rib,
+      issueDate: new Date().toISOString(),
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 jours
+      status: 'pending'
+    }
+
+    try {
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(invoiceData),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Facture créée:', result)
+        setShowInvoiceModal(false)
+        setInvoiceForm({
+          clientName: '',
+          clientAddress: '',
+          clientVAT: '',
+          items: [{ description: '', quantity: '', unitPrice: '', vatRate: 20 }],
+          rib: ''
+        })
+        // Ici vous pourriez ajouter une notification de succès
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création de la facture:', error)
     }
   }
 
@@ -819,10 +944,205 @@ export default function App() {
           <h2 className="text-3xl font-bold">Billing</h2>
           <p className="text-muted-foreground">Manage invoices, payments, and billing.</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Invoice
-        </Button>
+        <Dialog open={showInvoiceModal} onOpenChange={setShowInvoiceModal}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Invoice
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Créer une nouvelle facture</DialogTitle>
+              <DialogDescription>
+                Remplissez les informations du client et les détails de la facture.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Informations du client */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Informations du client</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="clientName">Nom du client *</Label>
+                    <Input
+                      id="clientName"
+                      key="clientName"
+                      value={invoiceForm.clientName}
+                      onChange={(e) => handleInputChange('clientName', e.target.value)}
+                      placeholder="Nom de l'entreprise ou du client"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="clientVAT">Numéro de TVA</Label>
+                    <Input
+                      id="clientVAT"
+                      key="clientVAT"
+                      value={invoiceForm.clientVAT}
+                      onChange={(e) => handleInputChange('clientVAT', e.target.value)}
+                      placeholder="FR12345678901"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="clientAddress">Adresse complète *</Label>
+                  <Textarea
+                    id="clientAddress"
+                    key="clientAddress"
+                    value={invoiceForm.clientAddress}
+                    onChange={(e) => handleInputChange('clientAddress', e.target.value)}
+                    placeholder="Adresse complète du client"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              {/* Articles de la facture */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Articles de la facture</h3>
+                  <Button type="button" variant="outline" size="sm" onClick={addInvoiceItem}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Ajouter un article
+                  </Button>
+                </div>
+                
+                <div className="space-y-4">
+                  {invoiceForm.items.map((item, index) => (
+                    <div key={index} className="border border-border rounded-lg p-4 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-medium">Article {index + 1}</h4>
+                        {invoiceForm.items.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeInvoiceItem(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <Label htmlFor={`description-${index}`}>Description du service *</Label>
+                          <Input
+                            id={`description-${index}`}
+                            key={`description-${index}`}
+                            value={item.description}
+                            onChange={(e) => updateInvoiceItem(index, 'description', e.target.value)}
+                            placeholder="Description détaillée du service"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`quantity-${index}`}>Quantité</Label>
+                          <Input
+                            id={`quantity-${index}`}
+                            key={`quantity-${index}`}
+                            type="number"
+                            min="1"
+                            value={item.quantity || ''}
+                            onChange={(e) => handleNumberInput(index, 'quantity', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`unitPrice-${index}`}>Prix unitaire HT (€)</Label>
+                          <Input
+                            id={`unitPrice-${index}`}
+                            key={`unitPrice-${index}`}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={item.unitPrice || ''}
+                            onChange={(e) => handleNumberInput(index, 'unitPrice', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`vatRate-${index}`}>Taux de TVA (%)</Label>
+                          <Select
+                            key={`vatRate-${index}`}
+                            value={item.vatRate.toString()}
+                            onValueChange={(value) => updateInvoiceItem(index, 'vatRate', parseInt(value))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">0%</SelectItem>
+                              <SelectItem value="5.5">5.5%</SelectItem>
+                              <SelectItem value="10">10%</SelectItem>
+                              <SelectItem value="20">20%</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Montant HT</Label>
+                          <div className="text-lg font-semibold">
+                            {((item.quantity || 0) * (item.unitPrice || 0)).toFixed(2)} €
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Montant TVA</Label>
+                          <div className="text-lg font-semibold">
+                            {((item.quantity || 0) * (item.unitPrice || 0) * ((item.vatRate || 0) / 100)).toFixed(2)} €
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Total TTC</Label>
+                          <div className="text-lg font-semibold text-primary">
+                            {((item.quantity || 0) * (item.unitPrice || 0) * (1 + (item.vatRate || 0) / 100)).toFixed(2)} €
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Totaux */}
+              <div className="border-t pt-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Total HT:</span>
+                    <span className="font-semibold">{calculateInvoiceTotals.subtotal.toFixed(2)} €</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total TVA:</span>
+                    <span className="font-semibold">{calculateInvoiceTotals.vatAmount.toFixed(2)} €</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold border-t pt-2">
+                    <span>Total TTC:</span>
+                    <span className="text-primary">{calculateInvoiceTotals.total.toFixed(2)} €</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIB */}
+              <div>
+                <Label htmlFor="rib">RIB (Relevé d'Identité Bancaire)</Label>
+                <Textarea
+                  id="rib"
+                  key="rib"
+                  value={invoiceForm.rib}
+                  onChange={(e) => handleInputChange('rib', e.target.value)}
+                  placeholder="Votre RIB pour le paiement"
+                  rows={2}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInvoiceModal(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleCreateInvoice}>
+                Créer la facture
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
