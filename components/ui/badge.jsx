@@ -4,17 +4,26 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-xl border-2 px-3 py-1 text-xs font-bold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+          "neu-button bg-gradient-primary text-white shadow-neu-light dark:shadow-neu-dark",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "neu-button bg-gradient-secondary text-white shadow-neu-light dark:shadow-neu-dark",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
-        outline: "text-foreground",
+          "neu-button bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-neu-light dark:shadow-neu-dark",
+        outline: 
+          "neu-button border-2 border-vivid-primary/30 text-vivid-primary shadow-neu-light dark:shadow-neu-dark",
+        accent:
+          "neu-button bg-gradient-accent text-white shadow-neu-light dark:shadow-neu-dark",
+        success:
+          "neu-button bg-gradient-success text-white shadow-neu-light dark:shadow-neu-dark",
+        warning:
+          "neu-button bg-gradient-warning text-white shadow-neu-light dark:shadow-neu-dark",
+        primary:
+          "neu-button bg-gradient-primary text-white shadow-neu-light dark:shadow-neu-dark",
       },
     },
     defaultVariants: {

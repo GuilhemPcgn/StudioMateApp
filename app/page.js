@@ -367,55 +367,73 @@ export default function App() {
   }
 
   const Sidebar = () => (
-    <div className="w-64 bg-card border-r border-border h-screen flex flex-col">
-      <div className="p-6 border-b border-border">
-        <h1 className="text-2xl font-bold text-primary">StudioMate</h1>
-        <p className="text-sm text-muted-foreground">Professional Audio Platform</p>
+    <div className="w-64 neu-card h-screen flex flex-col border-r-2 border-vivid-primary/20">
+      <div className="p-6 border-b-2 border-vivid-primary/20">
+        <h1 className="text-3xl font-bold gradient-text">StudioMate</h1>
+        <p className="text-sm text-muted-foreground">Plateforme Audio Professionnelle</p>
       </div>
       
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-3">
         <Button 
           variant={currentView === 'dashboard' ? 'default' : 'ghost'} 
-          className="w-full justify-start"
+          className={`w-full justify-start ${
+            currentView === 'dashboard' 
+              ? 'neu-glow' 
+              : ''
+          }`}
           onClick={() => setCurrentView('dashboard')}
         >
-          <Home className="mr-2 h-4 w-4" />
+          <Home className="mr-3 h-5 w-5" />
           Dashboard
         </Button>
         <Button 
           variant={currentView === 'projects' ? 'default' : 'ghost'} 
-          className="w-full justify-start"
+          className={`w-full justify-start ${
+            currentView === 'projects' 
+              ? 'neu-glow' 
+              : ''
+          }`}
           onClick={() => setCurrentView('projects')}
         >
-          <FolderOpen className="mr-2 h-4 w-4" />
+          <FolderOpen className="mr-3 h-5 w-5" />
           Projects
         </Button>
         <Button 
           variant={currentView === 'sessions' ? 'default' : 'ghost'} 
-          className="w-full justify-start"
+          className={`w-full justify-start ${
+            currentView === 'sessions' 
+              ? 'neu-glow' 
+              : ''
+          }`}
           onClick={() => setCurrentView('sessions')}
         >
-          <Calendar className="mr-2 h-4 w-4" />
+          <Calendar className="mr-3 h-5 w-5" />
           Sessions
         </Button>
         <Button 
           variant={currentView === 'billing' ? 'default' : 'ghost'} 
-          className="w-full justify-start"
+          className={`w-full justify-start ${
+            currentView === 'billing' 
+              ? 'neu-glow' 
+              : ''
+          }`}
           onClick={() => setCurrentView('billing')}
         >
-          <DollarSign className="mr-2 h-4 w-4" />
+          <DollarSign className="mr-3 h-5 w-5" />
           Billing
         </Button>
       </nav>
 
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center space-x-3">
-          <Avatar>
-            <AvatarFallback>AE</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-medium">Alex Engineer</p>
-            <p className="text-xs text-muted-foreground">alex@studio.com</p>
+      <div className="p-4 border-t-2 border-vivid-primary/20">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <Avatar className="neu-button ring-2 ring-vivid-primary/20">
+              <AvatarFallback className="bg-gradient-primary text-white font-bold">AE</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-bold">Alex Engineer</p>
+              <p className="text-xs text-muted-foreground">alex@studio.com</p>
+            </div>
           </div>
         </div>
       </div>
@@ -423,91 +441,104 @@ export default function App() {
   )
 
   const DashboardView = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Dashboard</h2>
-          <p className="text-muted-foreground">Welcome back, Alex! Here's what's happening in your studio.</p>
+          <h2 className="text-4xl font-bold gradient-text">Dashboard</h2>
+          <p className="text-muted-foreground text-lg">Bon retour, Alex ! Voici ce qui se passe dans votre studio.</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          New Project
+        <Button variant="accent">
+          <Plus className="mr-3 h-5 w-5" />
+          Nouveau Projet
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-lg font-bold gradient-text">Projets Actifs</CardTitle>
+            <div className="neu-button p-2">
+              <FolderOpen className="h-6 w-6 text-vivid-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{projects.length}</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
+            <div className="text-4xl font-bold gradient-text">{projects.length}</div>
+            <p className="text-sm text-muted-foreground">+2 depuis le mois dernier</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Week's Sessions</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-lg font-bold gradient-text-secondary">Sessions de la Semaine</CardTitle>
+            <div className="neu-button p-2">
+              <Calendar className="h-6 w-6 text-vivid-secondary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">3 confirmed, 5 pending</p>
+            <div className="text-4xl font-bold gradient-text-secondary">8</div>
+            <p className="text-sm text-muted-foreground">3 confirmées, 5 en attente</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue This Month</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-lg font-bold gradient-text-accent">Revenus du Mois</CardTitle>
+            <div className="neu-button p-2">
+              <DollarSign className="h-6 w-6 text-vivid-accent" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$4,200</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <div className="text-4xl font-bold gradient-text-accent">$4,200</div>
+            <p className="text-sm text-muted-foreground">+12% depuis le mois dernier</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Files Processed</CardTitle>
-            <FileAudio className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-lg font-bold gradient-text">Fichiers Traités</CardTitle>
+            <div className="neu-button p-2">
+              <FileAudio className="h-6 w-6 text-vivid-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">142</div>
-            <p className="text-xs text-muted-foreground">+8 this week</p>
+            <div className="text-4xl font-bold gradient-text">142</div>
+            <p className="text-sm text-muted-foreground">+8 cette semaine</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Projects</CardTitle>
+            <CardTitle className="gradient-text text-xl">Projets Récents</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {projects.slice(0, 3).map(project => (
-              <div key={project.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
+              <div key={project.id} className="neu-nav p-4 rounded-2xl border-2 border-vivid-primary/20">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <h4 className="font-medium">{project.name}</h4>
-                    <Badge variant="outline">{project.status}</Badge>
+                  <div className="flex items-center space-x-3 mb-2">
+                    <h4 className="font-bold text-lg">{project.name}</h4>
+                    <Badge variant="primary">{project.status}</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{project.artist}</p>
-                  <div className="mt-2">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span>Progress</span>
+                  <p className="text-sm text-muted-foreground mb-3">{project.artist}</p>
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between text-sm mb-2 font-semibold">
+                      <span>Progression</span>
                       <span>{project.progress}%</span>
                     </div>
-                    <Progress value={project.progress} className="h-2" />
+                    <Progress value={project.progress} />
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => {
-                  setSelectedProject(project)
-                  setCurrentView('projects')
-                }}>
-                  View
+                <Button 
+                  variant="accent" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => {
+                    setSelectedProject(project)
+                    setCurrentView('projects')
+                  }}
+                >
+                  Voir
                 </Button>
               </div>
             ))}
@@ -516,19 +547,19 @@ export default function App() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Upcoming Sessions</CardTitle>
+            <CardTitle className="gradient-text-secondary text-xl">Sessions à Venir</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {sessions.map(session => (
-              <div key={session.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-primary" />
+              <div key={session.id} className="neu-nav p-4 rounded-2xl border-2 border-vivid-secondary/20">
+                <div className="flex items-center space-x-4">
+                  <div className="neu-button w-14 h-14 rounded-2xl flex items-center justify-center">
+                    <Calendar className="h-7 w-7 text-vivid-secondary" />
                   </div>
-                  <div>
-                    <h4 className="font-medium">{session.title}</h4>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-lg">{session.title}</h4>
                     <p className="text-sm text-muted-foreground">{session.project}</p>
-                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                    <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
                       <span>{session.date}</span>
                       <span>•</span>
                       <span>{session.time}</span>
@@ -537,9 +568,14 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                <Badge variant={session.status === 'Confirmed' ? 'default' : 'secondary'}>
-                  {session.status}
-                </Badge>
+                <div className="mt-3">
+                  <Badge 
+                    variant={session.status === 'Confirmed' ? 'success' : 'warning'}
+                    className="w-full justify-center"
+                  >
+                    {session.status}
+                  </Badge>
+                </div>
               </div>
             ))}
           </CardContent>
